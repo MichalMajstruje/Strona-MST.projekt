@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MST Projekt – Transmisje Live & Telebimy LED</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080a0e;
+      --deep: #0d1117;
+      --surface: #131820;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00d4ff;
+      --accent2: #ff4d6d;
+      --text: #e8edf5;
+      --muted: #7a8498;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(0,212,255,0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: all 0.18s ease;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(8,10,14,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.12em;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.6rem 1.5rem;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .nav-cta:hover { background: var(--accent); color: var(--black); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 4rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 40%, rgba(0,212,255,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,77,109,0.06) 0%, transparent 50%),
+        linear-gradient(180deg, #080a0e 0%, #0a1020 100%);
+      z-index: 0;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      z-index: 0;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+    }
+    /* Animated scanning line */
+    .hero-scan {
+      position: absolute; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: scan 4s linear infinite;
+      opacity: 0.3;
+      z-index: 1;
+    }
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    .hero-label {
+      position: relative; z-index: 2;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .hero-label::before {
+      content: '';
+      display: block;
+      width: 40px; height: 1px;
+      background: var(--accent);
+    }
+    .hero-title {
+      position: relative; z-index: 2;
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 12vw, 11rem);
+      line-height: 0.88;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+    .hero-title .line2 { color: var(--accent); padding-left: 3rem; display: block; }
+    .hero-desc {
+      position: relative; z-index: 2;
+      max-width: 520px;
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+    .hero-actions {
+      position: relative; z-index: 2;
+      display: flex; gap: 1.5rem; align-items: center;
+    }
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 1rem 2.5rem;
+      background: var(--accent);
+      color: var(--black);
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.25s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+    .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 0.6rem;
+      transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-ghost::after {
+      content: '→';
+      transition: transform 0.2s;
+    }
+    .btn-ghost:hover::after { transform: translateX(4px); }
+
+    /* STATS BAR */
+    .stats {
+      position: absolute; bottom: 0; right: 4rem;
+      z-index: 2;
+      display: flex; gap: 0; 
+      border-left: 1px solid var(--border);
+    }
+    .stat {
+      padding: 1.5rem 2.5rem;
+      border-right: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      background: rgba(13,17,23,0.7);
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* SCROLL INDICATOR */
+    .scroll-hint {
+      position: absolute; bottom: 3rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    }
+    .scroll-line {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    /* SECTIONS */
+    section { padding: 8rem 4rem; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 30px; height: 1px;
+      background: var(--accent);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      line-height: 0.9;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    /* SERVICES */
+    .services { background: var(--deep); }
+    .services-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-bottom: 5rem;
+      align-items: end;
+    }
+    .services-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.8;
+      font-weight: 300;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    .service-card {
+      background: var(--surface);
+      padding: 3rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .service-card:hover { background: #181f2a; }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      transform-origin: left;
+    }
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-num {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .service-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      line-height: 1;
+    }
+    .service-name {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .service-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+    .service-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 1.5rem;
+    }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* TELEBIMS */
+    .telebims {
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    .telebims-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(0,212,255,0.05) 0%, transparent 60%);
+    }
+    .telebims-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 6rem;
+      align-items: center;
+      position: relative;
+    }
+    .telebims-cards {
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .telebim-card {
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      background: var(--surface);
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .telebim-card:hover { border-color: var(--accent); }
+    .telebim-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--accent);
+      padding: 0.2rem 0.7rem;
+      display: inline-block;
+      margin-bottom: 1.2rem;
+    }
+    .telebim-badge.b2 { background: var(--accent2); }
+    .telebim-name {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .telebim-area {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    .telebim-area.a2 { color: var(--accent2); }
+    .telebim-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .telebim-specs {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+    .spec {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .spec strong { color: var(--text); display: block; font-size: 0.8rem; }
+
+    /* LED VISUALIZER */
+    .led-vis {
+      position: relative;
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+    .led-screen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .led-screen-inner {
+      background: linear-gradient(135deg, #001a2e 0%, #002d4a 50%, #001a2e 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .led-pixels {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(0,212,255,0.15) 1px, transparent 1px);
+      background-size: 8px 8px;
+    }
+    .led-content {
+      position: relative; z-index: 2;
+      text-align: center;
+    }
+    .led-size-label {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: rgba(0,212,255,0.9);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 30px rgba(0,212,255,0.6);
+    }
+    .led-p-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: rgba(0,212,255,0.5);
+      text-transform: uppercase;
+    }
+    .screen-big { }
+    .screen-big .led-screen-inner { height: 200px; }
+    .screen-small .led-screen-inner { height: 120px; }
+    .screen-big .led-size-label { font-size: 3.5rem; }
+
+    /* EVENTS */
+    .events { background: var(--deep); }
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      margin-top: 4rem;
+    }
+    .event-item {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      display: flex; flex-direction: column;
+      transition: background 0.3s;
+    }
+    .event-item:hover { background: #181f2a; }
+    .event-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+    .event-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .event-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    /* GRAPHICS */
+    .graphics {
+      background: var(--black);
+      position: relative;
+    }
+    .graphics-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .graphics-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1rem;
+    }
+    .g-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.8rem;
+      aspect-ratio: 4/3;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .g-card.featured {
+      grid-column: span 2;
+      aspect-ratio: 16/6;
+    }
+    .g-card-bg {
+      position: absolute; inset: 0;
+      opacity: 0.3;
+    }
+    .gc1 .g-card-bg { background: linear-gradient(135deg, #00d4ff20, transparent); }
+    .gc2 .g-card-bg { background: linear-gradient(135deg, #ff4d6d20, transparent); }
+    .gc3 .g-card-bg { background: linear-gradient(135deg, #7c3aed20, transparent); }
+    .gc4 .g-card-bg { background: linear-gradient(135deg, #10b98120, transparent); }
+    .g-card-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      position: relative; z-index: 2;
+    }
+    .g-card-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      position: relative; z-index: 2;
+    }
+    .graphics-content {
+      display: flex; flex-direction: column;
+    }
+    .graphics-list {
+      list-style: none;
+      margin-top: 2rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .graphics-list li {
+      display: flex; align-items: flex-start; gap: 1rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .graphics-list li::before {
+      content: '—';
+      color: var(--accent);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    /* PROCESS */
+    .process { background: var(--deep); }
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      margin-top: 4rem;
+      position: relative;
+    }
+    .process-steps::after {
+      content: '';
+      position: absolute;
+      top: 1.8rem; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent), transparent);
+      opacity: 0.2;
+    }
+    .step {
+      padding: 0 2rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      color: var(--accent);
+      opacity: 0.15;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+    .step-dot {
+      width: 12px; height: 12px;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      margin-bottom: 2rem;
+    }
+    .step-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .step-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* CONTACT */
+    .contact {
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 100% 100%, rgba(0,212,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 0% 0%, rgba(255,77,109,0.04) 0%, transparent 50%);
+    }
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      position: relative;
+    }
+    .contact-form {
+      display: flex; flex-direction: column; gap: 1.2rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .form-input, .form-select, .form-textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.9rem 1.2rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+    }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .form-select {
+      cursor: pointer;
+    }
+    .contact-info {
+      display: flex; flex-direction: column; gap: 3rem;
+    }
+    .contact-intro {
+      font-size: 1.5rem;
+      line-height: 1.5;
+      font-weight: 300;
+      color: var(--text);
+    }
+    .contact-details {
+      display: flex; flex-direction: column; gap: 1.2rem;
+    }
+    .contact-item {
+      display: flex; align-items: flex-start; gap: 1.5rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-item-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .contact-item-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .contact-item-val {
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--deep);
+      padding: 3rem 4rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* MOBILE NAV BURGER */
+    .nav-burger { display: none; flex-direction: column; gap: 4px; cursor: pointer; }
+    .nav-burger span { display: block; width: 24px; height: 1px; background: var(--text); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      nav { padding: 1.2rem 2rem; }
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+      section { padding: 5rem 2rem; }
+      .hero { padding: 0 2rem 10rem; }
+      .services-intro { grid-template-columns: 1fr; gap: 2rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      .telebims-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .events-grid { grid-template-columns: 1fr 1fr; }
+      .graphics-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .process-steps { grid-template-columns: 1fr 1fr; }
+      .process-steps::after { display: none; }
+      .contact-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .stats { display: none; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .events-grid { grid-template-columns: 1fr; }
+      .graphics-visual { grid-template-columns: 1fr; }
+      .g-card.featured { grid-column: span 1; }
+      .process-steps { grid-template-columns: 1fr; }
+    }
+
+    /* SCROLL ANIMATIONS */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .fade-in-delay-1 { transition-delay: 0.1s; }
+    .fade-in-delay-2 { transition-delay: 0.2s; }
+    .fade-in-delay-3 { transition-delay: 0.3s; }
+    .fade-in-delay-4 { transition-delay: 0.4s; }
+  </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">MST<span>.</span>PROJEKT</div>
+    <ul class="nav-links">
+      <li><a href="#oferta">Oferta</a></li>
+      <li><a href="#telebimy">Telebimy</a></li>
+      <li><a href="#eventy">Eventy</a></li>
+      <li><a href="#grafiki">Grafiki</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+    <a href="#kontakt" class="nav-cta">Zapytaj o wycenę</a>
+    <div class="nav-burger" id="navBurger">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-scan"></div>
+
+    <div class="hero-label">MST Projekt — Produkcja Eventowa</div>
+    <h1 class="hero-title">
+      Twój event<br>
+      <span class="line2">na żywo.</span>
+    </h1>
+    <p class="hero-desc">
+      Transmisje live, telebimy LED i identyfikacja wizualna dla konferencji, koncertów, imprez plenerowych i każdego wydarzenia — małego i dużego.
+    </p>
+    <div class="hero-actions">
+      <a href="#kontakt" class="btn-primary">Zapytaj o realizację</a>
+      <a href="#oferta" class="btn-ghost">Zobacz ofertę</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">40m²</div>
+        <div class="stat-label">Telebim P8</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">20m²</div>
+        <div class="stat-label">Telebim P3</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4K</div>
+        <div class="stat-label">Stream Live</div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="oferta">
+    <div class="services-intro">
+      <div>
+        <div class="section-label fade-in">Co robimy</div>
+        <h2 class="section-title fade-in">Kompleksowa<br>obsługa AV</h2>
+      </div>
+      <p class="services-desc fade-in">
+        Od koncepcji po realizację — zapewniamy pełne wsparcie techniczne i kreatywne Twojego eventu. Transmisje live, ekrany LED, grafiki i animacje w jednym miejscu.
+      </p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card fade-in">
+        <div class="service-num">01 / 04</div>
+        <div class="service-icon">📡</div>
+        <div class="service-name">Transmisje Live</div>
+        <p class="service-desc">Profesjonalna realizacja transmisji na żywo z wielokamerowym podglądem, miksowaniem obrazu i dźwięku. Streaming na YouTube, Facebook, własne platformy i dowolne inne.</p>
+        <div class="service-tags">
+          <span class="tag">YouTube</span>
+          <span class="tag">Facebook Live</span>
+          <span class="tag">Multi-kamera</span>
+          <span class="tag">4K</span>
+        </div>
+      </div>
+      <div class="service-card fade-in fade-in-delay-1">
+        <div class="service-num">02 / 04</div>
+        <div class="service-icon">🖥️</div>
+        <div class="service-name">Telebimy LED</div>
+        <p class="service-desc">Wynajem i obsługa telebimów LED do plenerów i hal. Telebim P8,33 (~40m²) i P3 (~20m²) — dostosowane do każdych warunków oświetleniowych.</p>
+        <div class="service-tags">
+          <span class="tag">P8,33 – 40m²</span>
+          <span class="tag">P3 – 20m²</span>
+          <span class="tag">Outdoor</span>
+          <span class="tag">Indoor</span>
+        </div>
+      </div>
+      <div class="service-card fade-in fade-in-delay-2">
+        <div class="service-num">03 / 04</div>
+        <div class="service-icon">🎨</div>
+        <div class="service-name">Grafiki & Animacje</div>
+        <p class="service-desc">Oprawy graficzne dostosowane do Twojej identyfikacji wizualnej. Plansze tytułowe, dolne paski (lower thirds), animacje intro/outro i pełne packagi eventowe.</p>
+        <div class="service-tags">
+          <span class="tag">After Effects</span>
+          <span class="tag">Lower thirds</span>
+          <span class="tag">Branding</span>
+        </div>
+      </div>
+      <div class="service-card fade-in fade-in-delay-3" style="grid-column: span 1;">
+        <div class="service-num">04 / 04</div>
+        <div class="service-icon">🎬</div>
+        <div class="service-name">Rejestracja Video</div>
+        <p class="service-desc">Nagranie i montaż materiałów z eventów — gotowe skróty, highlighty i pełne rejestracje do późniejszego wykorzystania.</p>
+        <div class="service-tags">
+          <span class="tag">Montaż</span>
+          <span class="tag">Highlight reel</span>
+          <span class="tag">Archiwum</span>
+        </div>
+      </div>
+      <div class="service-card fade-in fade-in-delay-1" style="background: rgba(0,212,255,0.04);">
+        <div class="service-num" style="color: var(--accent);">BONUS</div>
+        <div class="service-icon">🤝</div>
+        <div class="service-name">Kompleksowa obsługa</div>
+        <p class="service-desc">Możemy być z Tobą od początku do końca. Doradzimy w doborze sprzętu, zaplanujemy produkcję i przeprowadzimy pełną realizację techniczną.</p>
+        <div class="service-tags">
+          <span class="tag">Konsultacje</span>
+          <span class="tag">Projekt</span>
+          <span class="tag">Realizacja</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELEBIMS -->
+  <section class="telebims" id="telebimy">
+    <div class="telebims-bg"></div>
+    <div class="telebims-layout">
+      <div>
+        <div class="section-label fade-in">Sprzęt własny</div>
+        <h2 class="section-title fade-in">Telebimy<br>LED</h2>
+        <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 3rem;" class="fade-in">
+          Dysponujemy własnymi ekranami LED — nie pośredniczymy, nie podnajmujemy. To oznacza niższe ceny i pełną kontrolę nad jakością.
+        </p>
+        <div class="telebims-cards">
+          <div class="telebim-card fade-in">
+            <div class="telebim-badge">Flagship</div>
+            <div class="telebim-name">P8,33</div>
+            <div class="telebim-area">~40 m² powierzchni</div>
+            <p class="telebim-desc">Idealny do dużych imprez plenerowych, festiwali i koncertów. Doskonała widoczność w dziennym świetle.</p>
+            <div class="telebim-specs">
+              <div class="spec"><strong>Pixel Pitch</strong>8,33 mm</div>
+              <div class="spec"><strong>Przeznaczenie</strong>Outdoor / Indoor</div>
+              <div class="spec"><strong>Powierzchnia</strong>~40 m²</div>
+              <div class="spec"><strong>Jasność</strong>Bardzo wysoka</div>
+            </div>
+          </div>
+          <div class="telebim-card fade-in fade-in-delay-1">
+            <div class="telebim-badge b2">Premium</div>
+            <div class="telebim-name">P3</div>
+            <div class="telebim-area a2">~20 m² powierzchni</div>
+            <p class="telebim-desc">Wyższa rozdzielczość na mniejszej powierzchni — idealny do konferencji, eventów korporacyjnych i imprez zamkniętych.</p>
+            <div class="telebim-specs">
+              <div class="spec"><strong>Pixel Pitch</strong>3 mm</div>
+              <div class="spec"><strong>Przeznaczenie</strong>Indoor / Outdoor</div>
+              <div class="spec"><strong>Powierzchnia</strong>~20 m²</div>
+              <div class="spec"><strong>Rozdzielczość</strong>Bardzo wysoka</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="led-vis fade-in">
+        <div class="led-screen screen-big">
+          <div class="led-screen-inner">
+            <div class="led-pixels"></div>
+            <div class="led-content">
+              <div class="led-size-label">~40 m²</div>
+              <div class="led-p-label">Pixel Pitch P8,33</div>
+            </div>
+          </div>
+        </div>
+        <div class="led-screen screen-small">
+          <div class="led-screen-inner" style="background: linear-gradient(135deg, #1a0010 0%, #2d0020 50%, #1a0010 100%);">
+            <div class="led-pixels" style="background-image: radial-gradient(circle, rgba(255,77,109,0.15) 1px, transparent 1px); background-size: 4px 4px;"></div>
+            <div class="led-content">
+              <div class="led-size-label" style="color: rgba(255,77,109,0.9); text-shadow: 0 0 30px rgba(255,77,109,0.6);">~20 m²</div>
+              <div class="led-p-label" style="color: rgba(255,77,109,0.5);">Pixel Pitch P3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="events" id="eventy">
+    <div class="section-label fade-in">Gdzie działamy</div>
+    <h2 class="section-title fade-in">Każdy rodzaj<br>eventu</h2>
+    <div class="events-grid">
+      <div class="event-item fade-in">
+        <div class="event-icon">🎤</div>
+        <div class="event-name">Konferencje</div>
+        <p class="event-desc">Transmisje z paneli dyskusyjnych, wykładów i kongresów. Obsługa wielu mówców, prezentacji i tłumaczeń symultanicznych.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-1">
+        <div class="event-icon">🎵</div>
+        <div class="event-name">Koncerty</div>
+        <p class="event-desc">Dynamiczne transmisje z imprez muzycznych, festiwali i live shows. Wielokamerowe realizacje z pełną obsługą dźwięku.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-2">
+        <div class="event-icon">🌿</div>
+        <div class="event-name">Imprezy plenerowe</div>
+        <p class="event-desc">Outdoor events wymagają specjalnego sprzętu. Mamy doświadczenie w trudnych warunkach pogodowych i terenowych.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-3">
+        <div class="event-icon">🏆</div>
+        <div class="event-name">Sport & gale</div>
+        <p class="event-desc">Transmisje z gal sportowych, ceremonii wręczenia nagród, eventów branżowych i inauguracji.</p>
+      </div>
+      <div class="event-item fade-in">
+        <div class="event-icon">🎓</div>
+        <div class="event-name">Eventy korporacyjne</div>
+        <p class="event-desc">Konferencje prasowe, szkolenia, launch produktów, eventy integracyjne z pełną oprawą AV.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-1">
+        <div class="event-icon">📺</div>
+        <div class="event-name">Webinary & hybrydy</div>
+        <p class="event-desc">Łączymy widownię na żywo z uczestnikami online. Profesjonalne studia streamingowe i realizacje hybrydowe.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-2">
+        <div class="event-icon">🎪</div>
+        <div class="event-name">Festiwale</div>
+        <p class="event-desc">Wielodniowe imprezy z pełną infrastrukturą AV. Obsługa wielu scen i stref jednocześnie.</p>
+      </div>
+      <div class="event-item fade-in fade-in-delay-3">
+        <div class="event-icon">✨</div>
+        <div class="event-name">Inne eventi</div>
+        <p class="event-desc">Nie ma eventu, z którym nie mieliśmy do czynienia. Zadzwoń, opisz co planujesz — doradzimy najlepsze rozwiązanie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRAPHICS -->
+  <section class="graphics" id="grafiki">
+    <div class="graphics-layout">
+      <div class="graphics-visual fade-in">
+        <div class="g-card gc3 featured">
+          <div class="g-card-bg" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,212,255,0.1));"></div>
+          <div class="g-card-label">Identyfikacja wizualna eventu</div>
+          <div class="g-card-name" style="font-size: 1.8rem;">Spójny wygląd<br>od A do Z</div>
+        </div>
+        <div class="g-card gc1">
+          <div class="g-card-bg"></div>
+          <div class="g-card-label">Lower Third</div>
+          <div class="g-card-name">Podpisy<br>i paski</div>
+        </div>
+        <div class="g-card gc2">
+          <div class="g-card-bg"></div>
+          <div class="g-card-label">Animacje</div>
+          <div class="g-card-name">Motion<br>Graphics</div>
+        </div>
+        <div class="g-card gc4">
+          <div class="g-card-bg"></div>
+          <div class="g-card-label">Branding</div>
+          <div class="g-card-name">Ekrany<br>LED</div>
+        </div>
+        <div class="g-card" style="background: var(--surface);">
+          <div class="g-card-label">Video</div>
+          <div class="g-card-name">Intro<br>& Outro</div>
+        </div>
+      </div>
+      <div class="graphics-content fade-in fade-in-delay-2">
+        <div class="section-label">Produkcja graficzna</div>
+        <h2 class="section-title">Grafiki<br>& Animacje</h2>
+        <ul class="graphics-list">
+          <li>Plansze tytułowe i ekrany oczekiwania dopasowane do Twojego brandingu</li>
+          <li>Dolne paski (lower thirds) z imionami, tytułami i logotypami</li>
+          <li>Animacje logo, intro i outro do materiałów streamingowych</li>
+          <li>Grafiki eventowe przygotowane pod telebimy LED — poprawne proporcje i rozdzielczość</li>
+          <li>Pełne packagi dla powtarzalnych eventów (konferencje cykliczne, gale)</li>
+          <li>Materiały sponsorskie i reklamowe do integracji z transmisją</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process">
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <div class="section-label fade-in" style="justify-content: center;">Jak działamy</div>
+      <h2 class="section-title fade-in" style="text-align: center;">Droga do<br>realizacji</h2>
+    </div>
+    <div class="process-steps">
+      <div class="step fade-in">
+        <div class="step-num">01</div>
+        <div class="step-dot"></div>
+        <div class="step-name">Brief</div>
+        <p class="step-desc">Rozmawiamy o Twoim evencie, potrzebach i budżecie. Zbieramy wszystkie niezbędne informacje.</p>
+      </div>
+      <div class="step fade-in fade-in-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-dot"></div>
+        <div class="step-name">Wycena</div>
+        <p class="step-desc">Przygotowujemy szczegółową ofertę z wyceną sprzętu, obsługi i grafik.</p>
+      </div>
+      <div class="step fade-in fade-in-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-dot"></div>
+        <div class="step-name">Przygotowanie</div>
+        <p class="step-desc">Produkcja grafik, konfiguracja sprzętu, testy techniczne przed eventem.</p>
+      </div>
+      <div class="step fade-in fade-in-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-dot"></div>
+        <div class="step-name">Realizacja</div>
+        <p class="step-desc">Jesteśmy na miejscu od montażu po demontaż. Transmisja, obsługa telebimów, live support.</p>
+      </div>
+      <div class="step fade-in fade-in-delay-4">
+        <div class="step-num">05</div>
+        <div class="step-dot"></div>
+        <div class="step-name">Materiały</div>
+        <p class="step-desc">Po evencie — nagrania, montaż, archiwum i skróty do dalszego wykorzystania.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="kontakt">
+    <div class="contact-bg"></div>
+    <div class="contact-layout">
+      <div class="contact-info fade-in">
+        <div>
+          <div class="section-label">Skontaktuj się</div>
+          <h2 class="section-title">Zaplanujmy<br>realizację</h2>
+        </div>
+        <p class="contact-intro">
+          Opisz nam swój event, a przygotujemy dopasowaną ofertę. Bezpłatnie, bez zobowiązań.
+        </p>
+        <div class="contact-details">
+          <div class="contact-item">
+            <div class="contact-item-icon">📞</div>
+            <div>
+              <div class="contact-item-label">Telefon</div>
+              <div class="contact-item-val">+48 000 000 000</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">✉️</div>
+            <div>
+              <div class="contact-item-label">E-mail</div>
+              <div class="contact-item-val">kontakt@mstprojekt.pl</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">📍</div>
+            <div>
+              <div class="contact-item-label">Lokalizacja</div>
+              <div class="contact-item-val">Polska — obsługa całego kraju</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form fade-in fade-in-delay-1">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Imię i nazwisko</label>
+            <input type="text" class="form-input" placeholder="Jan Kowalski" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefon</label>
+            <input type="tel" class="form-input" placeholder="+48 000 000 000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" placeholder="jan@firma.pl" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rodzaj eventu</label>
+          <select class="form-select">
+            <option value="" disabled selected>Wybierz rodzaj eventu</option>
+            <option>Konferencja / kongres</option>
+            <option>Koncert / festiwal</option>
+            <option>Impreza plenerowa</option>
+            <option>Event korporacyjny</option>
+            <option>Gala / ceremonia</option>
+            <option>Webinar / event hybrydowy</option>
+            <option>Inne</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Orientacyjna data</label>
+            <input type="text" class="form-input" placeholder="np. 15 września 2026" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Czego potrzebujesz?</label>
+            <select class="form-select">
+              <option value="" disabled selected>Wybierz usługę</option>
+              <option>Transmisja live</option>
+              <option>Wynajem telebimów</option>
+              <option>Grafiki / animacje</option>
+              <option>Kompleksowa obsługa</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Szczegóły / dodatkowe informacje</label>
+          <textarea class="form-textarea" placeholder="Opisz swój event, liczbę uczestników, lokalizację..."></textarea>
+        </div>
+        <button class="btn-primary" style="border: none; font-size: 0.75rem; cursor: pointer;" onclick="alert('Formularz wysłany! (W wersji przedprodukcyjnej nie podłączony do Formspree)')">
+          Wyślij zapytanie →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">MST<span>.</span>PROJEKT</div>
+    <div class="footer-copy">© 2026 MST Projekt — Transmisje Live & Telebimy LED</div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      setTimeout(() => {
+        ring.style.left = e.clientX + 'px';
+        ring.style.top = e.clientY + 'px';
+      }, 80);
+    });
+    document.querySelectorAll('a, button, .service-card, .telebim-card').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        ring.style.width = '60px';
+        ring.style.height = '60px';
+        ring.style.borderColor = 'rgba(0,212,255,0.8)';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+        ring.style.borderColor = 'rgba(0,212,255,0.4)';
+      });
+    });
+
+    // Scroll animations
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Mobile nav
+    document.getElementById('navBurger').addEventListener('click', () => {
+      const links = document.querySelector('.nav-links');
+      if (links.style.display === 'flex') {
+        links.style.display = 'none';
+      } else {
+        links.style.cssText = 'display:flex; flex-direction:column; position:fixed; top:70px; left:0; right:0; background:#0d1117; padding:2rem; gap:1.5rem; z-index:99; border-bottom:1px solid rgba(255,255,255,0.07);';
+      }
+    });
+
+    // Smooth scrolling for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+        // close mobile menu if open
+        const links = document.querySelector('.nav-links');
+        if (window.innerWidth <= 1024) links.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
