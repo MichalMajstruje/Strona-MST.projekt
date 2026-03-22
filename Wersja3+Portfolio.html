@@ -56,7 +56,6 @@
       transform: translate(-50%, -50%);
       transition: all 0.18s ease;
     }
-    /* MUSI być po .cursor/.cursor-ring żeby nie być nadpisane przez display:none */
     @media (pointer: fine) {
       body { cursor: none; }
       .cursor { display: block; }
@@ -434,7 +433,7 @@
       position: relative;
       overflow: hidden;
     }
-    /* Desktop heights – wyraźnie wyższe */
+    /* Desktop heights – wizualizacje wyższe */
     .screen-big  .led-screen-inner { height: 400px; background: linear-gradient(135deg, #001a2e 0%, #002d4a 50%, #001a2e 100%); }
     .screen-small .led-screen-inner { height: 240px; background: linear-gradient(135deg, #1a0010 0%, #2d0020 50%, #1a0010 100%); }
 
@@ -510,6 +509,90 @@
       margin-bottom: 0.8rem;
     }
     .event-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; flex: 1; }
+
+    /* ── REALIZACJE (PORTFOLIO) ──────────────────────────────── */
+    .portfolio { background: var(--deep); }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    .portfolio-item {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    /* Główne zdjęcie (2 wiersze) */
+    .portfolio-item.main {
+      grid-row: span 2;
+    }
+    .portfolio-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.82) saturate(0.9);
+      transition: transform 0.5s ease, filter 0.4s ease;
+    }
+    .portfolio-item:hover img {
+      transform: scale(1.03);
+      filter: brightness(0.95) saturate(1);
+    }
+    /* Ustaw wysokości */
+    .portfolio-item.main  { height: 520px; }
+    .portfolio-item.small { height: 254px; }
+    /* Caption najeżdżany */
+    .portfolio-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.2rem 1.5rem;
+      background: linear-gradient(to top, rgba(8,10,14,0.85) 0%, transparent 100%);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .portfolio-item:hover .portfolio-caption {
+      opacity: 1;
+      transform: none;
+    }
+    .portfolio-caption-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.2rem;
+    }
+    .portfolio-caption-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    /* Border overlay on hover */
+    .portfolio-item::after {
+      content: '';
+      position: absolute; inset: 0;
+      border: 1px solid rgba(173,38,36,0);
+      transition: border-color 0.3s;
+      pointer-events: none;
+    }
+    .portfolio-item:hover::after {
+      border-color: rgba(173,38,36,0.4);
+    }
+
+    @media (max-width: 1024px) {
+      .portfolio-grid { grid-template-columns: 1fr 1fr; }
+      .portfolio-item.main { grid-row: span 1; height: 220px; }
+      .portfolio-item.small { height: 220px; }
+      .portfolio-caption { opacity: 1; transform: none; }
+    }
+    @media (max-width: 600px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .portfolio-item.main, .portfolio-item.small { height: 220px; }
+    }
 
     /* ── GRAPHICS ────────────────────────────────────────────── */
     .graphics { background: var(--black); position: relative; }
@@ -999,6 +1082,42 @@
     </div>
   </section>
 
+  <!-- PORTFOLIO / REALIZACJE -->
+  <section class="portfolio">
+    <div class="section-label fade-in">Z naszych realizacji</div>
+    <h2 class="section-title fade-in">Byliśmy tam</h2>
+    <div class="portfolio-grid">
+
+      <!-- Główne zdjęcie – LED screen plenerowy -->
+      <div class="portfolio-item main fade-in">
+        <img src="images/led_screen.jpg" alt="Telebim LED P8,33 – montaż plenerowy" />
+        <div class="portfolio-caption">
+          <div class="portfolio-caption-label">Telebim P8,33 · Outdoor</div>
+          <div class="portfolio-caption-title">Montaż ekranu LED ~40 m²</div>
+        </div>
+      </div>
+
+      <!-- Małe – stanowisko OB -->
+      <div class="portfolio-item small fade-in fade-in-delay-1">
+        <img src="images/ob_studio.jpg" alt="Stanowisko realizatora transmisji live" style="object-position: center 30%;" />
+        <div class="portfolio-caption">
+          <div class="portfolio-caption-label">Transmisja Live · Full HD</div>
+          <div class="portfolio-caption-title">Stanowisko realizatora</div>
+        </div>
+      </div>
+
+      <!-- Małe – koncert z ekranem LED -->
+      <div class="portfolio-item small fade-in fade-in-delay-2">
+        <img src="images/concert.jpg" alt="Koncert z ekranem LED i transmisją live" />
+        <div class="portfolio-caption">
+          <div class="portfolio-caption-label">Koncert · Eventy miejskie</div>
+          <div class="portfolio-caption-title">Ekran LED na scenie</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- GRAPHICS -->
   <section class="graphics" id="grafiki">
     <div class="graphics-layout">
@@ -1125,7 +1244,7 @@
             <div class="contact-item-icon">✉️</div>
             <div>
               <div class="contact-item-label">E-mail</div>
-              <div class="contact-item-val selectable">biuro@mstprojekt.pl</div>
+              <div class="contact-item-val selectable"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4c2e25393e230c213f383c3e2326292738623c20">[email&#160;protected]</a></div>
             </div>
           </div>
           <div class="contact-item">
@@ -1200,7 +1319,8 @@
     <div class="footer-copy">© 2025 MST Projekt — Transmisje Live & Telebimy LED</div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ── Kursor — tylko na urządzeniach z myszką (pointer: fine)
     const cursor = document.getElementById('cursor');
     const ring   = document.getElementById('cursorRing');
     if (window.matchMedia('(pointer: fine)').matches) {
