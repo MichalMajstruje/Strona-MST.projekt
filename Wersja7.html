@@ -72,7 +72,7 @@
     body { background: var(--black); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
 
     /* ── ZAZNACZANIE ─────────────────────────────────────────── */
-    * { user-select: none; -webkit-user-select: none; }
+    /* * { user-select: none; -webkit-user-select: none; } */
     .copyable { user-select: text; -webkit-user-select: text; cursor: pointer; }
     input, textarea, select { user-select: text; -webkit-user-select: text; }
 
@@ -642,7 +642,7 @@
           <p class="telebim-desc">Idealny do dużych imprez plenerowych, festiwali i koncertów. Doskonała widoczność nawet w dziennym świetle — widownia zobaczy każdy detal z daleka.</p>
           <div class="telebim-specs">
             <div class="spec"><strong>Pixel Pitch</strong>8,33 mm</div>
-            <div class="spec"><strong>Przeznaczenie</strong>Outdoor / Indoor</div>
+            <div class="spec"><strong>Przeznaczenie</strong>Outdoor</div>
             <div class="spec"><strong>Powierzchnia</strong>~60 m²</div>
             <div class="spec"><strong>Jasność</strong>Bardzo wysoka</div>
           </div>
@@ -713,7 +713,7 @@
     <h2 class="section-title fade-in">Byliśmy tam</h2>
     <div class="portfolio-grid">
       <div class="portfolio-item main fade-in">
-        <img src="images/dni_Odalanowa.png" alt="Telebim LED P8,33 – montaż plenerowy" loading="lazy" />
+        <img src="images/dni_Odalanowa.jpg" alt="Telebim LED P8,33 – montaż plenerowy" loading="lazy" />
         <div class="portfolio-caption">
           <div class="portfolio-caption-label">Telebim P8,33 · Outdoor</div>
           <div class="portfolio-caption-title">Montaż ekranu LED ~36 m²</div>
@@ -722,14 +722,14 @@
       <div class="portfolio-item small fade-in fade-in-delay-1">
         <img src="images/ob_studio.jpg" alt="Stanowisko realizatora transmisji live" loading="lazy" style="object-position:center 30%" />
         <div class="portfolio-caption">
-          <div class="portfolio-caption-label">Transmisja Live · Full HD</div>
+          <div class="portfolio-caption-label">Realizacja obrazu · Full HD</div>
           <div class="portfolio-caption-title">Stanowisko realizatora</div>
         </div>
       </div>
       <div class="portfolio-item small fade-in fade-in-delay-2">
-        <img src="images/wrocław_Odra_river_CUP.png" alt="Koncert z ekranem LED i transmisją live" loading="lazy" />
+        <img src="images/wrocław_Odra_river_CUP.jpg" alt="Koncert z ekranem LED i transmisją live" loading="lazy" />
         <div class="portfolio-caption">
-          <div class="portfolio-caption-label">Koncert · Impreza plenerowa</div>
+          <div class="portfolio-caption-label">Zawody sportowe · Impreza plenerowa</div>
           <div class="portfolio-caption-title">Ekran LED na scenie</div>
         </div>
       </div>
@@ -984,10 +984,20 @@
   <!-- FOOTER -->
   <footer>
     <div class="footer-logo"><img src="images/logo.png" alt="MST Projekt" /></div>
-    <div class="footer-copy">© 2025 MST Projekt — Transmisje Live & Telebimy LED</div>
+    <div class="footer-copy">© 2026 MST Projekt — Transmisje Live & Telebimy LED</div>
   </footer>
 
   <script>
+    /* ── Blokada Daty Przeszłej ────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const dateInput = document.getElementById('fc-date');
+      if (dateInput) {
+          dateInput.setAttribute('min', today);
+      }
+    });
+
     /* ── Kursor (desktop z myszką) ─────────────────────────── */
     const cursor = document.getElementById('cursor');
     const ring   = document.getElementById('cursorRing');
@@ -995,7 +1005,7 @@
       document.addEventListener('mousemove', e => {
         cursor.style.left = e.clientX + 'px';
         cursor.style.top  = e.clientY + 'px';
-        setTimeout(() => { ring.style.left = e.clientX+'px'; ring.style.top = e.clientY+'px'; }, 80);
+        setTimeout(() => { ring.style.left = e.clientX+'px'; ring.style.top = e.clientY+'px'; }, 40);
       });
       document.querySelectorAll('a, button, .service-card, .telebim-card, .copyable').forEach(el => {
         el.addEventListener('mouseenter', () => { ring.style.width=ring.style.height='60px'; ring.style.borderColor='rgba(173,38,36,0.8)'; });
@@ -1036,7 +1046,7 @@
       form.addEventListener('submit', async e => {
         e.preventDefault();
         
-        //walidacja?
+        //walidacja
         if (!form.checkValidity()) {
           form.reportValidity();
           return;
